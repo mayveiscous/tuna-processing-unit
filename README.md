@@ -1,4 +1,4 @@
-# TPU - Tuna Proccessing Unit
+# TPU - Tuna Processing Unit
 
 An 8-bit fantasy CPU and assembler written in Go.
 
