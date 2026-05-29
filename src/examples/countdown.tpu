@@ -1,0 +1,14 @@
+LOAD R1 10
+LOAD R2 1
+CALL loop
+
+loop:
+   DEC R1
+   PRINT R1
+   CMP R1 R2
+   JZ done
+   JMP loop
+
+done:
+   PRINT R1
+   HALT

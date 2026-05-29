@@ -1,0 +1,18 @@
+LOAD R1 1
+LOAD R2 10
+LOAD R3 1
+CALL count
+PRINT R1
+HALT
+
+count:
+   ADD R3 R1
+   INC R1
+   CMP R1 R2
+   JG done
+   JZ done
+   JMP count
+
+done:
+   PRINT R3
+   RET
