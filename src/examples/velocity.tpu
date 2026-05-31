@@ -1,24 +1,42 @@
-LOAD R0 1 ; position
-LOAD R1 1 ; velocity
-LOAD R2 50 ; max bounds
-LOAD R3 1 ; min bounds
+LOAD R0 1 ; position x
 
-CALL move
+LOAD R4 25 ; max x
+LOAD R5 1 ; min x
 
-move: 
-   CMP R0 R2
-   JZ reverse
+LOAD R6 3 ; max reversals
+LOAD R7 0 ; reversal count
 
-   ADD R0 R1
+CALL moveright
+
+HALT
+
+moveright:
+   INC R0
    PRINT R0
-   JMP move
 
-reverse:
-   SUB R0 R1
-   PRINT R0
-   CMP R0 R3
+   CMP R0 R4
+   JZ reverseleft
+
+   JMP moveright
+   RET
+
+
+reverseleft:
+   INC R7
+
+   CMP R7 R6
    JZ done
-   JMP reverse
+
+moveleft:
+   DEC R0
+   PRINT R0
+
+   CMP R0 R5
+   JZ moveright
+
+   JMP moveleft
+   RET
+
 
 done:
-   HALT
+   RET
