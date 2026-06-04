@@ -2,7 +2,6 @@ LOAD R1 1
 LOAD R2 10
 LOAD R3 1
 CALL count
-PRINT R1
 HALT
 
 count:

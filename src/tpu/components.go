@@ -41,7 +41,7 @@ func MUL(cpu *TPU) {
 func DIV(cpu *TPU) {
 	regA, regB := cpu.decodeRegs()
 
-	if !(cpu.registers[regA] > 0) || !(cpu.registers[regB] > 0) {
+	if cpu.registers[regB] == 0 {
 		fmt.Println("DIV: attempt to divide by zero...")
 		return
 	}
@@ -136,8 +136,8 @@ func PRINT(cpu *TPU) {
 
 func CALL(cpu *TPU) {
 	address := cpu.fetch()
-	cpu.Memory[cpu.sp] = cpu.pc
 	cpu.sp--
+	cpu.Memory[cpu.sp] = cpu.pc
 	cpu.pc = address
 }
 
