@@ -41,6 +41,11 @@ func MUL(cpu *TPU) {
 func DIV(cpu *TPU) {
 	regA, regB := cpu.decodeRegs()
 
+	if !(cpu.registers[regA] > 0) || !(cpu.registers[regB] > 0) {
+		fmt.Println("DIV: attempt to divide by zero...")
+		return
+	}
+	
 	result := cpu.registers[regA] / cpu.registers[regB]
 	cpu.registers[regA] = result
 	cpu.zero = result == 0
@@ -90,7 +95,7 @@ func JG(cpu *TPU) {
 func JL(cpu *TPU) {
 	addr := cpu.fetch()
 
-	if !cpu.greater {
+	if !cpu.greater && !cpu.zero {
 		cpu.pc = addr
 	}
 }
