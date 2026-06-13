@@ -12,6 +12,7 @@ type TPU struct {
 	sp        uint8
 	zero      bool
 	greater   bool
+	less      bool
 	running   bool
 }
 

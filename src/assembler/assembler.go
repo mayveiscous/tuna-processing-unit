@@ -6,7 +6,15 @@ import (
 	"tpu/src/isa"
 )
 
+type LineType uint8
+
+const (
+	LineInstruction LineType = iota
+	LineLabel
+)
+
 type Line struct {
+	Type        LineType
 	Instruction string
 	Args        []string
 }
@@ -15,6 +23,12 @@ type InstructionDef struct {
 	Opcode  uint8
 	Size    uint8
 	Handler InstructionHandler
+}
+
+var commandPrefixes = []string{
+	"!",
+	"$",
+	".",
 }
 
 var Instructions = map[string]InstructionDef{
@@ -42,25 +56,22 @@ var Instructions = map[string]InstructionDef{
 	"JL":    {isa.OP_JL, 2, JL},
 }
 
-func ResolveLabels(lines []Line) map[string]uint8 {
-	labels := map[string]uint8{}
-	var counter uint8 = 0
-
-	for _, line := range lines {
-		if strings.HasSuffix(line.Instruction, ":") {
-			name := strings.TrimSuffix(line.Instruction, ":")
-			labels[name] = counter
-			continue
+func isCommand(inst string) (string, bool) {
+	for _, prefix := range commandPrefixes {
+		if strings.HasPrefix(inst, prefix) {
+			return strings.TrimSpace(inst[len(prefix):]), true
 		}
-
-		def, exists := Instructions[line.Instruction]
-		if !exists {
-			panic(fmt.Sprintf("unknown instruction '%s'", line.Instruction))
-		}
-		counter += def.Size
 	}
+	return "", false
+}
 
-	return labels
+
+// cant really execute these at executor level 
+// need to bubble up to emulation likely
+// how..
+func executeCommand(cmd string) {
+	if cmd == "debug" {
+	}
 }
 
 func Tokenize(source string) []Line {
@@ -77,8 +88,24 @@ func Tokenize(source string) []Line {
 		}
 
 		fields := strings.Fields(raw)
+		inst := fields[0]
+
+		if cmd, ok := isCommand(inst); ok {
+			executeCommand(cmd)
+			continue
+		}
+
+		if strings.HasSuffix(inst, ":") {
+			lines = append(lines, Line{
+				Type:        LineLabel,
+				Instruction: inst,
+			})
+			continue
+		}
+
 		lines = append(lines, Line{
-			Instruction: fields[0],
+			Type:        LineInstruction,
+			Instruction: inst,
 			Args:        fields[1:],
 		})
 	}
@@ -86,11 +113,37 @@ func Tokenize(source string) []Line {
 	return lines
 }
 
+func ResolveLabels(lines []Line) map[string]uint8 {
+	labels := map[string]uint8{}
+	var counter uint8 = 0
+
+	for _, line := range lines {
+		if line.Type == LineLabel {
+			name := strings.TrimSuffix(line.Instruction, ":")
+			labels[name] = counter
+			continue
+		}
+
+		if line.Type != LineInstruction {
+			continue
+		}
+
+		def, exists := Instructions[line.Instruction]
+		if !exists {
+			panic(fmt.Sprintf("unknown instruction '%s'", line.Instruction))
+		}
+
+		counter += def.Size
+	}
+
+	return labels
+}
+
 func Assemble(lines []Line, labels map[string]uint8) ([]uint8, error) {
 	bytes := []uint8{}
 
 	for _, line := range lines {
-		if strings.HasSuffix(line.Instruction, ":") {
+		if line.Type != LineInstruction {
 			continue
 		}
 

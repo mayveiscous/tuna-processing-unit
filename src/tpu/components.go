@@ -60,7 +60,10 @@ func CMP(cpu *TPU) {
 	regA, regB := cpu.decodeRegs()
 
 	cpu.zero = cpu.registers[regA] == cpu.registers[regB]
-	cpu.greater = cpu.registers[regA] > cpu.registers[regB]
+	result := cpu.registers[regA] > cpu.registers[regB]
+
+	cpu.greater = result
+	cpu.less = !result
 }
 
 func JMP(cpu *TPU) {
@@ -95,7 +98,7 @@ func JG(cpu *TPU) {
 func JL(cpu *TPU) {
 	addr := cpu.fetch()
 
-	if !cpu.greater && !cpu.zero {
+	if cpu.less == true {
 		cpu.pc = addr
 	}
 }
@@ -136,14 +139,14 @@ func PRINT(cpu *TPU) {
 
 func CALL(cpu *TPU) {
 	address := cpu.fetch()
-	cpu.sp--
 	cpu.Memory[cpu.sp] = cpu.pc
+	cpu.sp--
 	cpu.pc = address
 }
 
 func RET(cpu *TPU) {
-	cpu.sp++
 	cpu.pc = cpu.Memory[cpu.sp]
+	cpu.sp++
 }
 
 func LOADM(cpu *TPU) {
