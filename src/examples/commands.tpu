@@ -1,0 +1,6 @@
+.debug
+LOAD R0 1
+LOAD R1 2
+ADD R0 R1
+PRINT R0
+HALT

@@ -4,15 +4,15 @@ A custom 8-bit fantasy CPU emulator and assembler written in Go. Designed and im
 
 ## Overview
 
-TPU defines its own ISA, assembles `.tpu` source files into bytecode, and executes them on a virtual machine. The project covers the full toolchain — from source text to running instructions — with no external dependencies beyond the Go standard library.
+TPU defines its own ISA, assembles `.tpu` source files into bytecode, and executes them on a virtual machine. The project covers the everythong from source text to running instructions, with no external dependencies beyond the Go standard library.
 
 ## Architecture
 
-- **8-bit registers and memory** — 16 general-purpose registers, 256 bytes of addressable memory
-- **Separate stack space** — stack grows downward from `0xFF`, bounded at `0xC0` to prevent collision with program memory
-- **Flags** — zero, greater, and less flags set by `CMP`, `ADD`, `SUB`, `INC`, `DEC`, and arithmetic operations
-- **Subroutine support** — `CALL` pushes the return address onto the stack; `RET` restores it
-- **Register packing** — two 4-bit register indices are packed into a single byte for two-operand instructions, keeping instruction sizes compact
+- **8-bit registers and memory**  16 general-purpose registers, 256 bytes of addressable memory
+- **Separate stack space**  stack grows downward from `0xFF`, bounded at `0xC0` to prevent collision with program memory
+- **Flags**  zero, greater, and less flags set by `CMP`, `ADD`, `SUB`, `INC`, `DEC`, and arithmetic operations
+- **Subroutine support**  `CALL` pushes the return address onto the stack; `RET` restores it
+- **Register packing** two 4-bit register indices are packed into a single byte for two-operand instructions, keeping instruction sizes compact
 
 ## Instruction Set
 
@@ -45,34 +45,22 @@ TPU defines its own ISA, assembles `.tpu` source files into bytecode, and execut
 
 The assembler is a two-pass implementation:
 
-1. **Tokenization** — strips comments (`;`), identifies labels, parses instructions and arguments
-2. **Label resolution** — walks all instructions to compute byte offsets, building a label-to-address map before assembly begins
-3. **Code generation** — emits bytecode using per-instruction handlers, resolving label references to concrete addresses
+1. **Tokenization**  strips comments (`;`), identifies labels, parses instructions and arguments
+2. **Label resolution**  walks all instructions to compute byte offsets, building a label-to-address map before assembly begins
+3. **Code generation**  emits bytecode using per-instruction handlers, resolving label references to concrete addresses
 
 Registers are written as `R0`–`R15`. Numeric literals support decimal and hex (`0x` prefix). Labels are defined with a trailing colon and referenced by name in jump and call instructions.
 
-## Project Structure
+## Debugger Commands
 
-```
-.
-├── main.go                   Entry point — reads source file, assembles, and runs
-├── src/
-│   ├── isa/
-│   │   └── isa.go            Opcode constants, register packing/unpacking, stack bounds
-│   ├── assembler/
-│   │   ├── assembler.go      Tokenizer, label resolver, and assembler driver
-│   │   └── map.go            Per-instruction encoding handlers
-│   └── tpu/
-│       ├── tpu.go            CPU struct, fetch/decode loop, opcode dispatch table
-│       └── components.go     Per-opcode execution handlers
-```
+Commands can be invoked with `.`, `!`, or `$` as a prefix  all three are equivalent (e.g. `.debug`, `!debug`, `$debug`).
 
-## Usage
-
-```bash
-go run . path/to/program.tpu
-```
-
-## Built With
-
-- Go (standard library only)
+| Command | Description |
+|---------|-------------|
+| `.debug` | Full CPU state dump  registers, PC, SP, and flags |
+| `.registers` | Print all 16 registers with hex and decimal values |
+| `.stack` | Print live stack contents with addresses |
+| `.memory` | Hex dump of all 256 bytes of memory |
+| `.step` | Execute one instruction and pause |
+| `.reset` | Reset CPU to initial state |
+| `.status` | Compact one-line summary of PC, SP, and flags |

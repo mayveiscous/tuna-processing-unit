@@ -30,6 +30,8 @@ const (
 	StackLimit = 0xC0
 )
 
+var Commands []string
+
 
 func PackRegs(a, b uint8) uint8 {
 	return (a << 4) | b
@@ -37,4 +39,8 @@ func PackRegs(a, b uint8) uint8 {
 
 func UnpackRegs(v uint8) (uint8, uint8) {
 	return v >> 4, v & 0x0F
+}
+
+func RegisterCommands(commands []string) {
+	Commands = append(Commands, commands...)
 }

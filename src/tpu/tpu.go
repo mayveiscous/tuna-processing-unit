@@ -41,12 +41,23 @@ var opcodeTable = map[uint8]OpcodeHandler{
 	isa.OP_DEC:   DEC,
 }
 
+var Commands = map[string]CommandHandler{
+    "debug":     Debug,
+    "registers": Registers,
+    "stack":     Stack,
+    "memory":    DumpMemory,
+    "step":      Step,
+    "reset":     Reset,
+    "status":    Status,
+}
+
 func NewTPU() *TPU {
 	return &TPU{
 		sp: isa.StackStart,
 	}
 }
 
+// quickly grab and inc pos
 func (cpu *TPU) fetch() uint8 {
 	val := cpu.Memory[cpu.pc]
 	cpu.pc++
@@ -61,6 +72,7 @@ func (cpu *TPU) decodeRegs() (uint8, uint8) {
 	return regA, regB
 }
 
+// register validation
 func (cpu *TPU) validateRegs(regA uint8, regB uint8) {
 	if regA >= uint8(len(cpu.registers)) || regB >= uint8(len(cpu.registers)) {
 		panic(fmt.Sprintf("invalid register(s): R%d R%d", regA, regB))
@@ -73,9 +85,15 @@ func (cpu *TPU) validateSingle(reg uint8) {
 	}
 }
 
+// main run loop
 func (cpu *TPU) Run() {
 	cpu.running = true
 
+	// execute commands
+	cmds := isa.Commands
+	ExecuteCommands(cmds, cpu)
+
+	// execute opcode
 	for cpu.running {
 		opcode := cpu.Memory[cpu.pc]
 		cpu.pc++
@@ -83,6 +101,7 @@ func (cpu *TPU) Run() {
 	}
 }
 
+// called for each opcode
 func (cpu *TPU) Execute(opcode uint8) {
 	component, exists := opcodeTable[opcode]
 

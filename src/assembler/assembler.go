@@ -66,14 +66,6 @@ func isCommand(inst string) (string, bool) {
 }
 
 
-// cant really execute these at executor level 
-// need to bubble up to emulation likely
-// how..
-func executeCommand(cmd string) {
-	if cmd == "debug" {
-	}
-}
-
 func Tokenize(source string) []Line {
 	lines := []Line{}
 
@@ -91,7 +83,7 @@ func Tokenize(source string) []Line {
 		inst := fields[0]
 
 		if cmd, ok := isCommand(inst); ok {
-			executeCommand(cmd)
+			isa.RegisterCommands([]string{cmd})
 			continue
 		}
 
